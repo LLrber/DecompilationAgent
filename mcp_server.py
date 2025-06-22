@@ -459,7 +459,7 @@ def main():
         
     elif settings.transport == "sse":
         # SSE模式 - Server-Sent Events
-        from fastapi import FastAPI
+        from fastapi import FastAPI, Request
         from fastapi.responses import StreamingResponse
         import uvicorn
         import json
