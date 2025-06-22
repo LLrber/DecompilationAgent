@@ -99,3 +99,7 @@
 2025-06-22 23:10:00,485 - __main__ - INFO - 收到SSE初始化通知
 2025-06-22 23:10:17,773 - __main__ - INFO - 收到MCP SSE请求: tools/list
 2025-06-22 23:10:24,383 - __main__ - INFO - 收到MCP SSE请求: tools/list
+2025-06-22 23:23:09,931 - __main__ - INFO - 启动 reverse-code-analyzer - 传输方式: sse
+2025-06-22 23:23:10,084 - __main__ - INFO - SSE服务器启动在 http://0.0.0.0:382
+2025-06-22 23:23:26,053 - __main__ - INFO - 新的MCP SSE连接建立
+2025-06-22 23:23:26,068 - __main__ - INFO - 发送MCP SSE初始化消息

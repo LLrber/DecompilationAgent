@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "reverse-code-analyzer": {
+      "url": "http://0.0.0.0:382/mcp",
+      "transport": "sse",
+      "timeout": 30000,
+      "reconnect": true,
+      "description": "Reverse Code Analysis Tool for Dify",
+      "headers": {
+        "Accept": "text/event-stream",
+        "Cache-Control": "no-cache"
+      }
+    }
+  }
+} 

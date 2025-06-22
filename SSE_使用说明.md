@@ -279,6 +279,55 @@ client.connect();
 
 服务器已准备就绪，可以与dify、Cursor等支持MCP协议的客户端进行连接！
 
+## 🎯 Dify专用配置
+
+**新增：基于FastMCP的Dify优化服务器**
+
+我们现在提供了两个版本的MCP服务器：
+
+### 1. 标准版本（mcp_server.py）
+- 基于原生MCP库
+- 支持HTTP和SSE模式
+- 适用于Cursor等标准MCP客户端
+
+### 2. Dify优化版本（mcp_server_dify.py）⭐
+- 基于FastMCP库
+- 专门为Dify优化
+- 更好的兼容性和稳定性
+
+**启动Dify优化服务器：**
+```bash
+# 使用批处理文件
+start_dify_server.bat
+
+# 或直接运行
+python mcp_server_dify.py
+```
+
+**Dify配置文件：**
+- `dify_mcp_config.json` - 完整的Dify配置信息
+- 服务器地址：`http://0.0.0.0:382`
+- 传输方式：SSE
+
+**在Dify中使用：**
+1. 在Dify的插件市场安装MCP SSE插件
+2. 使用以下连接信息：
+   - 服务器URL: `http://0.0.0.0:382`
+   - 传输方式: SSE
+   - 超时时间: 30秒
+
+**可用工具：**
+- `chunk_code_tool` - 代码分块处理
+- `analyze_function_tool` - 函数深度分析
+- `analyze_dependencies_tool` - 依赖关系分析
+- `generate_mermaid_chart_tool` - 生成可视化图表
+- `refactor_function_tool` - 重构建议
+- `generate_report_tool` - 综合分析报告
+- `search_code` - 代码搜索
+- `analyze_data_structures` - 数据结构分析
+- `security_audit` - 安全审计
+- `smart_assistant` - 智能助手
+
 ## 🔗 相关文档
 
 - [HTTP模式使用说明](README.md)

@@ -449,22 +449,34 @@ def main():
             try:
                 request_data = await request.json()
                 request_id = request_data.get("id", None)  # 提取请求ID
-                logger.info(f"收到MCP请求: {request_data.get('method', 'unknown')}")
+                logger.info(f"收到MCP请求: {request_data.get('method', 'unknown')} (ID: {request_id})")
                 response = await handle_mcp_request(request_data)
                 
                 # 如果是通知类型的消息，返回空响应
                 if response is None:
+                    logger.info(f"通知类型消息，返回状态确认")
                     return {"status": "ok"}
                 
+                logger.info(f"返回响应 (ID: {request_id})")
                 return response
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON解析错误: {e}")
+                return {
+                    "jsonrpc": "2.0",
+                    "id": None,  # JSON解析错误时ID为None
+                    "error": {
+                        "code": -32700,
+                        "message": f"Parse error: {str(e)}"
+                    }
+                }
             except Exception as e:
                 logger.error(f"MCP端点错误: {e}")
                 return {
                     "jsonrpc": "2.0",
-                    "id": request_id,  # 包含请求ID，解析错误时为None
+                    "id": request_id,  # 包含请求ID
                     "error": {
-                        "code": -32700,
-                        "message": "Parse error"
+                        "code": -32603,
+                        "message": f"Internal error: {str(e)}"
                     }
                 }
         
@@ -627,8 +639,11 @@ def main():
                     
             except Exception as e:
                 logger.error(f"MCP SSE请求处理错误: {e}")
-                # 确保request_id在异常情况下也有值
-                error_id = request_id if 'request_id' in locals() else None
+                # 在异常情况下，request_id可能未定义，使用None作为默认值
+                try:
+                    error_id = request_id
+                except NameError:
+                    error_id = None
                 return {
                     "jsonrpc": "2.0",
                     "id": error_id,
@@ -645,59 +660,87 @@ def main():
             try:
                 request_data = await request.json()
                 request_id = request_data.get("id", None)  # 提取请求ID
-                logger.info(f"收到MCP SSE请求: {request_data.get('method', 'unknown')}")
+                logger.info(f"收到MCP SSE请求: {request_data.get('method', 'unknown')} (ID: {request_id})")
                 response = await handle_mcp_request_sse(request_data)
                 
                 # 如果是通知类型的消息，返回空响应
                 if response is None:
+                    logger.info(f"SSE通知类型消息，返回状态确认")
                     return {"status": "ok"}
                 
+                logger.info(f"返回SSE响应 (ID: {request_id})")
                 return response
+            except json.JSONDecodeError as e:
+                logger.error(f"SSE JSON解析错误: {e}")
+                return {
+                    "jsonrpc": "2.0",
+                    "id": None,  # JSON解析错误时ID为None
+                    "error": {
+                        "code": -32700,
+                        "message": f"Parse error: {str(e)}"
+                    }
+                }
             except Exception as e:
                 logger.error(f"MCP SSE端点错误: {e}")
                 return {
                     "jsonrpc": "2.0",
-                    "id": request_id,  # 包含请求ID，解析错误时为None
+                    "id": request_id,  # 包含请求ID
                     "error": {
-                        "code": -32700,
-                        "message": "Parse error"
+                        "code": -32603,
+                        "message": f"Internal error: {str(e)}"
                     }
                 }
         
         @app.get("/mcp")
         async def mcp_sse_endpoint():
             """MCP专用SSE端点 - 符合MCP协议的SSE实现"""
+            logger.info("新的MCP SSE连接建立")
             async def mcp_event_stream():
-                # 发送初始化消息
-                init_message = {
-                    "jsonrpc": "2.0",
-                    "method": "notifications/initialized",
-                    "params": {
-                        "protocolVersion": "2024-11-05",
-                        "serverInfo": {
-                            "name": settings.server_name,
-                            "version": "1.0.0"
-                        }
-                    }
-                }
-                yield f"data: {json.dumps(init_message)}\n\n"
-                
-                # 持续发送心跳
-                while True:
-                    heartbeat = {
+                try:
+                    # 发送连接确认
+                    logger.info("发送MCP SSE初始化消息")
+                    init_message = {
                         "jsonrpc": "2.0",
-                        "method": "notifications/progress",
+                        "method": "notifications/initialized",
                         "params": {
-                            "progressToken": "heartbeat",
-                            "value": {
-                                "kind": "report",
-                                "message": "Server running",
-                                "percentage": 100
+                            "protocolVersion": "2024-11-05",
+                            "serverInfo": {
+                                "name": settings.server_name,
+                                "version": "1.0.0"
                             }
                         }
                     }
-                    yield f"data: {json.dumps(heartbeat)}\n\n"
-                    await asyncio.sleep(30)
+                    yield f"data: {json.dumps(init_message)}\n\n"
+                    
+                    # 持续发送心跳
+                    heartbeat_count = 0
+                    while True:
+                        heartbeat_count += 1
+                        heartbeat = {
+                            "jsonrpc": "2.0",
+                            "method": "notifications/progress",
+                            "params": {
+                                "progressToken": f"heartbeat_{heartbeat_count}",
+                                "value": {
+                                    "kind": "report",
+                                    "message": "Server running",
+                                    "percentage": 100
+                                }
+                            }
+                        }
+                        yield f"data: {json.dumps(heartbeat)}\n\n"
+                        logger.debug(f"发送心跳 #{heartbeat_count}")
+                        await asyncio.sleep(30)
+                except Exception as e:
+                    logger.error(f"MCP SSE事件流错误: {e}")
+                    error_message = {
+                        "jsonrpc": "2.0",
+                        "method": "notifications/error",
+                        "params": {
+                            "error": str(e)
+                        }
+                    }
+                    yield f"data: {json.dumps(error_message)}\n\n"
             
             return StreamingResponse(
                 mcp_event_stream(),

@@ -1,0 +1,57 @@
+{
+  "name": "reverse-code-analyzer",
+  "description": "逆向代码分析工具 - 专为Dify优化",
+  "url": "http://0.0.0.0:382",
+  "transport": "sse",
+  "timeout": 30000,
+  "reconnect": true,
+  "capabilities": {
+    "tools": [
+      {
+        "name": "chunk_code_tool",
+        "description": "将长代码文件分块处理，解决大模型上下文限制"
+      },
+      {
+        "name": "analyze_function_tool", 
+        "description": "深度分析单个函数的结构、复杂度和潜在问题"
+      },
+      {
+        "name": "analyze_dependencies_tool",
+        "description": "分析函数间的依赖关系和调用链"
+      },
+      {
+        "name": "generate_mermaid_chart_tool",
+        "description": "生成Mermaid格式的依赖关系图表"
+      },
+      {
+        "name": "refactor_function_tool",
+        "description": "提供函数重构建议和优化方案"
+      },
+      {
+        "name": "generate_report_tool",
+        "description": "生成综合分析报告"
+      },
+      {
+        "name": "search_code",
+        "description": "在代码中搜索特定模式或结构"
+      },
+      {
+        "name": "analyze_data_structures",
+        "description": "分析代码中的数据结构定义和使用"
+      },
+      {
+        "name": "security_audit",
+        "description": "安全审计工具，检测潜在的安全问题"
+      },
+      {
+        "name": "smart_assistant",
+        "description": "智能分析助手，基于历史记录提供个性化建议"
+      }
+    ]
+  },
+  "server_info": {
+    "name": "Reverse Code Analyzer",
+    "version": "1.0.0",
+    "protocol_version": "2024-11-05"
+  }
+} 
