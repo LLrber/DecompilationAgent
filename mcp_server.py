@@ -222,7 +222,7 @@ def main():
             """处理MCP协议请求"""
             method = request_data.get("method")
             params = request_data.get("params", {})
-            request_id = request_data.get("id")
+            request_id = request_data.get("id", None)  # 确保id有默认值
             
             try:
                 if method == "initialize":
@@ -417,9 +417,11 @@ def main():
                     
             except Exception as e:
                 logger.error(f"MCP请求处理错误: {e}")
+                # 确保request_id在异常情况下也有值
+                error_id = request_id if 'request_id' in locals() else None
                 return {
                     "jsonrpc": "2.0",
-                    "id": request_id,
+                    "id": error_id,
                     "error": {
                         "code": -32603,
                         "message": str(e)
@@ -429,8 +431,10 @@ def main():
         @app.post("/")
         async def mcp_endpoint(request: Request):
             """MCP协议主端点"""
+            request_id = None
             try:
                 request_data = await request.json()
+                request_id = request_data.get("id", None)  # 提取请求ID
                 logger.info(f"收到MCP请求: {request_data.get('method', 'unknown')}")
                 response = await handle_mcp_request(request_data)
                 return response
@@ -438,6 +442,7 @@ def main():
                 logger.error(f"MCP端点错误: {e}")
                 return {
                     "jsonrpc": "2.0",
+                    "id": request_id,  # 包含请求ID，解析错误时为None
                     "error": {
                         "code": -32700,
                         "message": "Parse error"
@@ -512,7 +517,7 @@ def main():
             try:
                 method = request_data.get("method")
                 params = request_data.get("params", {})
-                request_id = request_data.get("id")
+                request_id = request_data.get("id", None)  # 确保id有默认值
                 
                 if method == "initialize":
                     return {
@@ -598,9 +603,11 @@ def main():
                     
             except Exception as e:
                 logger.error(f"MCP SSE请求处理错误: {e}")
+                # 确保request_id在异常情况下也有值
+                error_id = request_id if 'request_id' in locals() else None
                 return {
                     "jsonrpc": "2.0",
-                    "id": request_id,
+                    "id": error_id,
                     "error": {
                         "code": -32603,
                         "message": str(e)
@@ -610,8 +617,10 @@ def main():
         @app.post("/mcp")
         async def mcp_sse_post_endpoint(request: Request):
             """MCP SSE模式的POST端点 - 处理工具调用"""
+            request_id = None
             try:
                 request_data = await request.json()
+                request_id = request_data.get("id", None)  # 提取请求ID
                 logger.info(f"收到MCP SSE请求: {request_data.get('method', 'unknown')}")
                 response = await handle_mcp_request_sse(request_data)
                 return response
@@ -619,6 +628,7 @@ def main():
                 logger.error(f"MCP SSE端点错误: {e}")
                 return {
                     "jsonrpc": "2.0",
+                    "id": request_id,  # 包含请求ID，解析错误时为None
                     "error": {
                         "code": -32700,
                         "message": "Parse error"

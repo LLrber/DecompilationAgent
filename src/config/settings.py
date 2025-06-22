@@ -35,7 +35,7 @@ class Settings:
     
     # SSE设置
     sse_host: str = "0.0.0.0"
-    sse_port: int = 8001
+    sse_port: int = 382
     
     # 日志设置
     log_level: str = "INFO"
@@ -59,7 +59,7 @@ class Settings:
             http_host=os.getenv("HTTP_HOST", "0.0.0.0"),
             http_port=int(os.getenv("HTTP_PORT", "382")),
             sse_host=os.getenv("SSE_HOST", "0.0.0.0"),
-            sse_port=int(os.getenv("SSE_PORT", "8001")),
+            sse_port=int(os.getenv("SSE_PORT", "382")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             log_file=os.getenv("LOG_FILE", "logs/app.log"),
             debug=os.getenv("DEBUG", "false").lower() == "true"

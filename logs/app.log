@@ -77,3 +77,5 @@
 2025-06-22 22:40:03,735 - __main__ - INFO - 启动 reverse-code-analyzer - 传输方式: sse
 2025-06-22 22:40:26,470 - __main__ - INFO - 启动 reverse-code-analyzer - 传输方式: sse
 2025-06-22 22:40:26,606 - __main__ - INFO - SSE服务器启动在 http://0.0.0.0:8001
+2025-06-22 22:47:38,967 - __main__ - INFO - 启动 reverse-code-analyzer - 传输方式: sse
+2025-06-22 22:47:39,207 - __main__ - INFO - SSE服务器启动在 http://0.0.0.0:8001
