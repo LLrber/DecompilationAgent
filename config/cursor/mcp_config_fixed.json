@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "reverse-code-analyzer": {
+      "command": "D:\\Anaconda\\python.exe",
+      "args": ["mcp_server.py", "--transport", "stdio"],
+      "cwd": "E:\\Project\\DecompilationAgent",
+      "env": {
+        "TRANSPORT": "stdio",
+        "LOG_LEVEL": "INFO"
+      },
+      "description": "Reverse Code Analysis Tool"
+    }
+  }
+} 

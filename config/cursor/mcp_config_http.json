@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "reverse-code-analyzer": {
+      "url": "http://localhost:382",
+      "description": "Reverse Code Analysis Tool (HTTP Mode)"
+    }
+  }
+} 

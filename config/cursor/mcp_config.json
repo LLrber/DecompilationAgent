@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "reverse-code-analyzer": {
+      "command": "python",
+      "args": ["mcp_server.py", "--transport", "stdio"],
+      "cwd": "E:/Project/DecompilationAgent",
+      "env": {
+        "TRANSPORT": "stdio",
+        "LOG_LEVEL": "INFO"
+      },
+      "description": "逆向代码分析工具 - 专门用于分析反编译得到的C代码，支持函数分析、依赖关系图、重构建议等功能"
+    }
+  }
+} 
