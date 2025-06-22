@@ -178,8 +178,8 @@ def main():
         default=settings.transport,
         help="通信方式"
     )
-    parser.add_argument("--host", default=settings.http_host, help="HTTP主机地址")
-    parser.add_argument("--port", type=int, default=settings.http_port, help="HTTP端口")
+    parser.add_argument("--host", default=settings.http_host, help="主机地址")
+    parser.add_argument("--port", type=int, help="端口号（如果不指定，HTTP使用382，SSE使用8001）")
     parser.add_argument("--debug", action="store_true", help="启用调试模式")
     
     args = parser.parse_args()
@@ -187,6 +187,15 @@ def main():
     # 更新设置
     settings.transport = args.transport
     settings.debug = args.debug
+    
+    # 根据传输方式确定端口
+    if args.port is not None:
+        # 用户指定了端口
+        if settings.transport == "sse":
+            settings.sse_port = args.port
+        else:
+            settings.http_port = args.port
+    # 如果用户没有指定端口，使用默认值（HTTP: 382, SSE: 8001）
     
     logger.info(f"启动 {settings.server_name} - 传输方式: {settings.transport}")
     
@@ -371,6 +380,11 @@ def main():
                         }
                     }
                 
+                elif method == "notifications/initialized":
+                    # 处理初始化通知 - 这是一个通知，不需要响应
+                    logger.info("收到初始化通知")
+                    return None  # 通知不需要响应
+                
                 elif method == "tools/call":
                     tool_name = params.get("name")
                     arguments = params.get("arguments", {})
@@ -437,6 +451,11 @@ def main():
                 request_id = request_data.get("id", None)  # 提取请求ID
                 logger.info(f"收到MCP请求: {request_data.get('method', 'unknown')}")
                 response = await handle_mcp_request(request_data)
+                
+                # 如果是通知类型的消息，返回空响应
+                if response is None:
+                    return {"status": "ok"}
+                
                 return response
             except Exception as e:
                 logger.error(f"MCP端点错误: {e}")
@@ -573,6 +592,11 @@ def main():
                         }
                     }
                 
+                elif method == "notifications/initialized":
+                    # 处理初始化通知 - 这是一个通知，不需要响应
+                    logger.info("收到SSE初始化通知")
+                    return None  # 通知不需要响应
+                
                 elif method == "tools/call":
                     tool_name = params.get("name")
                     arguments = params.get("arguments", {})
@@ -623,6 +647,11 @@ def main():
                 request_id = request_data.get("id", None)  # 提取请求ID
                 logger.info(f"收到MCP SSE请求: {request_data.get('method', 'unknown')}")
                 response = await handle_mcp_request_sse(request_data)
+                
+                # 如果是通知类型的消息，返回空响应
+                if response is None:
+                    return {"status": "ok"}
+                
                 return response
             except Exception as e:
                 logger.error(f"MCP SSE端点错误: {e}")
