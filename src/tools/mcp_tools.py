@@ -138,14 +138,26 @@ def chunk_code(file_path: str, max_chunk_size: int = 2000) -> Dict[str, Any]:
     将长代码文件分块处理，解决大模型上下文限制
     
     Args:
-        file_path: 代码文件路径
+        file_path: 代码文件路径或URL
         max_chunk_size: 最大块大小（行数）
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        # 检查是否为URL
+        if file_path.startswith(('http://', 'https://')):
+            import requests
+            response = requests.get(file_path, timeout=30)
+            response.raise_for_status()
+            content = response.text
+            # 从URL中提取文件名用于显示
+            url_filename = file_path.split('/')[-1].split('?')[0] or "remote_file"
+            display_path = f"URL: {url_filename}"
+        else:
+            # 本地文件处理
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            display_path = file_path
     except Exception as e:
-        return {"error": f"无法读取文件: {str(e)}"}
+        return {"error": f"无法读取文件/URL: {str(e)}"}
     
     functions = analyzer.extract_functions(content)
     
@@ -179,9 +191,11 @@ def chunk_code(file_path: str, max_chunk_size: int = 2000) -> Dict[str, Any]:
         "total_chunks": len(chunks),
         "chunks": chunks,
         "file_info": {
-            "path": file_path,
+            "path": display_path,
+            "original_path": file_path,
             "total_lines": len(content.split('\n')),
-            "total_functions": len(functions)
+            "total_functions": len(functions),
+            "is_url": file_path.startswith(('http://', 'https://'))
         }
     }
     
@@ -546,15 +560,24 @@ def search_code_tool(file_path: str, search_pattern: str, search_type: str = "fu
     在代码中搜索特定模式
     
     Args:
-        file_path: 代码文件路径
+        file_path: 代码文件路径或URL
         search_pattern: 搜索模式（函数名、变量名、字符串等）
         search_type: 搜索类型 ("function", "variable", "string", "regex")
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        # 检查是否为URL
+        if file_path.startswith(('http://', 'https://')):
+            import requests
+            response = requests.get(file_path, timeout=30)
+            response.raise_for_status()
+            content = response.text
+            display_path = f"URL: {file_path.split('/')[-1].split('?')[0] or 'remote_file'}"
+        else:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            display_path = file_path
     except Exception as e:
-        return {"error": f"无法读取文件: {str(e)}"}
+        return {"error": f"无法读取文件/URL: {str(e)}"}
     
     lines = content.split('\n')
     results = []
@@ -616,8 +639,10 @@ def search_code_tool(file_path: str, search_pattern: str, search_type: str = "fu
         "total_matches": len(results),
         "results": results[:50],  # 限制结果数量
         "file_info": {
-            "path": file_path,
-            "total_lines": len(lines)
+            "path": display_path,
+            "original_path": file_path,
+            "total_lines": len(lines),
+            "is_url": file_path.startswith(('http://', 'https://'))
         }
     }
     
@@ -633,13 +658,22 @@ def analyze_data_structures_tool(file_path: str) -> Dict[str, Any]:
     分析代码中的数据结构
     
     Args:
-        file_path: 代码文件路径
+        file_path: 代码文件路径或URL
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        # 检查是否为URL
+        if file_path.startswith(('http://', 'https://')):
+            import requests
+            response = requests.get(file_path, timeout=30)
+            response.raise_for_status()
+            content = response.text
+            display_path = f"URL: {file_path.split('/')[-1].split('?')[0] or 'remote_file'}"
+        else:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            display_path = file_path
     except Exception as e:
-        return {"error": f"无法读取文件: {str(e)}"}
+        return {"error": f"无法读取文件/URL: {str(e)}"}
     
     structures = []
     enums = []
@@ -739,13 +773,22 @@ def security_audit_tool(file_path: str) -> Dict[str, Any]:
     安全审计工具，检测潜在的安全问题
     
     Args:
-        file_path: 代码文件路径
+        file_path: 代码文件路径或URL
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        # 检查是否为URL
+        if file_path.startswith(('http://', 'https://')):
+            import requests
+            response = requests.get(file_path, timeout=30)
+            response.raise_for_status()
+            content = response.text
+            display_path = f"URL: {file_path.split('/')[-1].split('?')[0] or 'remote_file'}"
+        else:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            display_path = file_path
     except Exception as e:
-        return {"error": f"无法读取文件: {str(e)}"}
+        return {"error": f"无法读取文件/URL: {str(e)}"}
     
     lines = content.split('\n')
     security_issues = []

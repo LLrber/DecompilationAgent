@@ -42,10 +42,10 @@ def create_reverse_code_analyzer_server(config: ConfigSchema = ConfigSchema()):
     
     @mcp.tool()
     def chunk_code_tool(
-        file_path: str = Field(description="代码文件路径"),
+        file_path: str = Field(description="代码文件路径或URL"),
         max_chunk_size: Optional[int] = Field(default=None, description="最大块大小，默认600行")
     ) -> Dict[str, Any]:
-        """将长代码文件分块处理，解决大模型上下文限制"""
+        """将长代码文件分块处理，解决大模型上下文限制。支持本地文件和远程URL"""
         try:
             if max_chunk_size is None:
                 max_chunk_size = config.max_chunk_size
@@ -223,11 +223,11 @@ def create_reverse_code_analyzer_server(config: ConfigSchema = ConfigSchema()):
     
     @mcp.tool()
     def search_code(
-        file_path: str = Field(description="文件路径"),
+        file_path: str = Field(description="文件路径或URL"),
         search_pattern: str = Field(description="搜索模式"),
         search_type: str = Field(default="function", description="搜索类型")
     ) -> Dict[str, Any]:
-        """在代码中搜索特定模式或结构"""
+        """在代码中搜索特定模式或结构。支持本地文件和远程URL"""
         try:
             result = search_code_tool(
                 file_path=file_path,
@@ -257,9 +257,9 @@ def create_reverse_code_analyzer_server(config: ConfigSchema = ConfigSchema()):
     
     @mcp.tool()
     def analyze_data_structures(
-        file_path: str = Field(description="文件路径")
+        file_path: str = Field(description="文件路径或URL")
     ) -> Dict[str, Any]:
-        """分析代码中的数据结构定义和使用"""
+        """分析代码中的数据结构定义和使用。支持本地文件和远程URL"""
         try:
             result = analyze_data_structures_tool(file_path=file_path)
             analyzer.log_analysis("analyze_data_structures", result)
@@ -285,9 +285,9 @@ def create_reverse_code_analyzer_server(config: ConfigSchema = ConfigSchema()):
     
     @mcp.tool()
     def security_audit(
-        file_path: str = Field(description="文件路径")
+        file_path: str = Field(description="文件路径或URL")
     ) -> Dict[str, Any]:
-        """安全审计工具，检测潜在的安全问题"""
+        """安全审计工具，检测潜在的安全问题。支持本地文件和远程URL"""
         try:
             result = security_audit_tool(file_path=file_path)
             analyzer.log_analysis("security_audit", result)
