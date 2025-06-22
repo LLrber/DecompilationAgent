@@ -91,3 +91,11 @@
 2025-06-22 23:01:05,696 - __main__ - INFO - SSE服务器启动在 http://0.0.0.0:382
 2025-06-22 23:01:20,697 - __main__ - INFO - 启动 reverse-code-analyzer - 传输方式: sse
 2025-06-22 23:01:20,858 - __main__ - INFO - SSE服务器启动在 http://0.0.0.0:382
+2025-06-22 23:09:16,147 - __main__ - INFO - 启动 reverse-code-analyzer - 传输方式: sse
+2025-06-22 23:09:16,320 - __main__ - INFO - SSE服务器启动在 http://0.0.0.0:382
+2025-06-22 23:09:30,232 - __main__ - INFO - 收到MCP SSE请求: notifications/initialized
+2025-06-22 23:09:30,233 - __main__ - INFO - 收到SSE初始化通知
+2025-06-22 23:10:00,484 - __main__ - INFO - 收到MCP SSE请求: notifications/initialized
+2025-06-22 23:10:00,485 - __main__ - INFO - 收到SSE初始化通知
+2025-06-22 23:10:17,773 - __main__ - INFO - 收到MCP SSE请求: tools/list
+2025-06-22 23:10:24,383 - __main__ - INFO - 收到MCP SSE请求: tools/list

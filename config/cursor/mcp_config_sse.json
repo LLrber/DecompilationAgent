@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "reverse-code-analyzer": {
-      "url": "http://0.0.0.0:8001/mcp",
+      "url": "http://0.0.0.0:382/mcp",
       "transport": "sse",
       "description": "Reverse Code Analysis Tool (SSE Mode)"
     }

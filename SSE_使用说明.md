@@ -41,10 +41,10 @@ python mcp_server.py
 
 ### 服务器信息
 - **主机地址**: 0.0.0.0 (允许外部访问)
-- **端口**: 8001
-- **服务器信息**: http://0.0.0.0:8001/
-- **标准SSE端点**: http://0.0.0.0:8001/sse
-- **MCP SSE端点**: http://0.0.0.0:8001/mcp (推荐用于MCP客户端)
+- **端口**: 382
+- **服务器信息**: http://0.0.0.0:382/
+- **标准SSE端点**: http://0.0.0.0:382/sse
+- **MCP SSE端点**: http://0.0.0.0:382/mcp (推荐用于MCP客户端)
 
 ### 访问方式
 
@@ -60,15 +60,15 @@ python mcp_server.py
 #### 2. 使用curl命令
 ```bash
 # 测试服务器状态
-curl http://0.0.0.0:8001/
+curl http://0.0.0.0:382/
 
 # 连接SSE流
-curl -N -H "Accept: text/event-stream" http://0.0.0.0:8001/sse
+curl -N -H "Accept: text/event-stream" http://0.0.0.0:382/sse
 ```
 
 #### 3. 使用JavaScript
 ```javascript
-const eventSource = new EventSource('http://0.0.0.0:8001/sse');
+const eventSource = new EventSource('http://0.0.0.0:382/sse');
 
 eventSource.onopen = function(event) {
     console.log('SSE连接已建立');
@@ -90,7 +90,7 @@ import requests
 import json
 
 # 连接SSE流
-response = requests.get('http://0.0.0.0:8001/sse', stream=True)
+response = requests.get('http://0.0.0.0:382/sse', stream=True)
 
 for line in response.iter_lines():
     if line:
@@ -123,7 +123,7 @@ for line in response.iter_lines():
 
 ### 环境变量
 - `SSE_HOST`: SSE服务器主机地址（默认：0.0.0.0）
-- `SSE_PORT`: SSE服务器端口（默认：8001）
+- `SSE_PORT`: SSE服务器端口（默认：382）
 - `DEBUG`: 启用调试模式（默认：false）
 
 ### 配置文件
@@ -132,7 +132,7 @@ for line in response.iter_lines():
 ```python
 # SSE设置
 sse_host: str = "0.0.0.0"
-sse_port: int = 8001
+sse_port: int = 382
 ```
 
 ## 🛠️ MCP集成
@@ -143,7 +143,7 @@ sse_port: int = 8001
 {
   "mcpServers": {
     "reverse-code-analyzer": {
-      "url": "http://0.0.0.0:8001/mcp",
+      "url": "http://0.0.0.0:382/mcp",
       "transport": "sse",
       "description": "Reverse Code Analysis Tool (SSE Mode)"
     }
@@ -237,6 +237,47 @@ class SSEClient {
 const client = new SSEClient('http://0.0.0.0:8001/sse');
 client.connect();
 ```
+
+## ✅ 测试状态
+
+**已修复的问题：**
+1. Content-Type错误 - 已修复为"text/event-stream"
+2. "'id'"字段错误 - 已修复notifications/initialized处理
+
+**测试结果：**
+- MCP初始化请求：✅ 成功
+- 工具列表请求：✅ 成功
+- notifications/initialized请求：✅ 成功处理
+- 服务器启动：✅ 端口382监听正常
+- 所有MCP协议请求均能正确处理
+
+## 🎉 部署完成
+
+**MCP服务器配置完成！**
+
+**最终配置：**
+- HTTP模式端口：382
+- SSE模式端口：382
+- 主机地址：0.0.0.0（支持外部访问）
+- 文件切割大小：600行
+- 支持的传输方式：HTTP、SSE
+- MCP端点：`/mcp`（用于Cursor等客户端）
+- 标准SSE端点：`/sse`（用于web测试）
+
+**客户端连接配置：**
+```json
+{
+  "mcpServers": {
+    "reverse-code-analyzer": {
+      "command": "python",
+      "args": ["E:/Project/DecompilationAgent/mcp_server.py", "--transport", "sse", "--host", "0.0.0.0"],
+      "env": {}
+    }
+  }
+}
+```
+
+服务器已准备就绪，可以与dify、Cursor等支持MCP协议的客户端进行连接！
 
 ## 🔗 相关文档
 
