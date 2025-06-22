@@ -30,11 +30,11 @@ class Settings:
     transport: str = "stdio"  # stdio, http, sse
     
     # HTTP设置
-    http_host: str = "localhost"
+    http_host: str = "0.0.0.0"
     http_port: int = 382
     
     # SSE设置
-    sse_host: str = "localhost"
+    sse_host: str = "0.0.0.0"
     sse_port: int = 8001
     
     # 日志设置
@@ -56,9 +56,9 @@ class Settings:
             max_chunk_size=int(os.getenv("MAX_CHUNK_SIZE", "600")),
             max_nodes=int(os.getenv("MAX_NODES", "20")),
             transport=os.getenv("TRANSPORT", "stdio"),
-            http_host=os.getenv("HTTP_HOST", "localhost"),
+            http_host=os.getenv("HTTP_HOST", "0.0.0.0"),
             http_port=int(os.getenv("HTTP_PORT", "382")),
-            sse_host=os.getenv("SSE_HOST", "localhost"),
+            sse_host=os.getenv("SSE_HOST", "0.0.0.0"),
             sse_port=int(os.getenv("SSE_PORT", "8001")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             log_file=os.getenv("LOG_FILE", "logs/app.log"),

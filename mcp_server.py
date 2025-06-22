@@ -482,6 +482,7 @@ def main():
         
         @app.get("/sse")
         async def sse_endpoint():
+            """标准SSE端点 - 用于浏览器和通用SSE客户端"""
             async def event_stream():
                 while True:
                     # 这里可以实现实时数据推送
@@ -495,10 +496,179 @@ def main():
             
             return StreamingResponse(
                 event_stream(),
-                media_type="text/plain",
+                media_type="text/event-stream",
                 headers={
                     "Cache-Control": "no-cache",
                     "Connection": "keep-alive",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET",
+                    "Access-Control-Allow-Headers": "Cache-Control"
+                }
+            )
+        
+        # 创建MCP请求处理函数（重用HTTP模式的逻辑）
+        async def handle_mcp_request_sse(request_data: dict) -> dict:
+            """处理MCP请求 - SSE模式"""
+            try:
+                method = request_data.get("method")
+                params = request_data.get("params", {})
+                request_id = request_data.get("id")
+                
+                if method == "initialize":
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": {
+                            "protocolVersion": "2024-11-05",
+                            "capabilities": {
+                                "tools": {}
+                            },
+                            "serverInfo": {
+                                "name": settings.server_name,
+                                "version": "1.0.0"
+                            }
+                        }
+                    }
+                
+                elif method == "tools/list":
+                    # 返回工具列表（与HTTP模式相同）
+                    tools = [
+                        {
+                            "name": "chunk_code_tool",
+                            "description": "将长代码文件分块处理，解决大模型上下文限制",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "file_path": {"type": "string"},
+                                    "max_chunk_size": {"type": "integer", "default": settings.max_chunk_size}
+                                },
+                                "required": ["file_path"]
+                            }
+                        },
+                        {
+                            "name": "analyze_function_tool",
+                            "description": "深度分析单个函数",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "function_code": {"type": "string"},
+                                    "function_name": {"type": "string"}
+                                },
+                                "required": ["function_code", "function_name"]
+                            }
+                        }
+                        # 可以添加更多工具...
+                    ]
+                    
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": {
+                            "tools": tools
+                        }
+                    }
+                
+                elif method == "tools/call":
+                    tool_name = params.get("name")
+                    arguments = params.get("arguments", {})
+                    
+                    # 工具路由
+                    if tool_name == "chunk_code_tool":
+                        result = chunk_code(**arguments)
+                    elif tool_name == "analyze_function_tool":
+                        result = analyze_function(**arguments)
+                    else:
+                        raise ValueError(f"未知工具: {tool_name}")
+                    
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": {
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": json.dumps(result, ensure_ascii=False, indent=2)
+                                }
+                            ]
+                        }
+                    }
+                
+                else:
+                    raise ValueError(f"未知方法: {method}")
+                    
+            except Exception as e:
+                logger.error(f"MCP SSE请求处理错误: {e}")
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "error": {
+                        "code": -32603,
+                        "message": str(e)
+                    }
+                }
+        
+        @app.post("/mcp")
+        async def mcp_sse_post_endpoint(request: Request):
+            """MCP SSE模式的POST端点 - 处理工具调用"""
+            try:
+                request_data = await request.json()
+                logger.info(f"收到MCP SSE请求: {request_data.get('method', 'unknown')}")
+                response = await handle_mcp_request_sse(request_data)
+                return response
+            except Exception as e:
+                logger.error(f"MCP SSE端点错误: {e}")
+                return {
+                    "jsonrpc": "2.0",
+                    "error": {
+                        "code": -32700,
+                        "message": "Parse error"
+                    }
+                }
+        
+        @app.get("/mcp")
+        async def mcp_sse_endpoint():
+            """MCP专用SSE端点 - 符合MCP协议的SSE实现"""
+            async def mcp_event_stream():
+                # 发送初始化消息
+                init_message = {
+                    "jsonrpc": "2.0",
+                    "method": "notifications/initialized",
+                    "params": {
+                        "protocolVersion": "2024-11-05",
+                        "serverInfo": {
+                            "name": settings.server_name,
+                            "version": "1.0.0"
+                        }
+                    }
+                }
+                yield f"data: {json.dumps(init_message)}\n\n"
+                
+                # 持续发送心跳
+                while True:
+                    heartbeat = {
+                        "jsonrpc": "2.0",
+                        "method": "notifications/progress",
+                        "params": {
+                            "progressToken": "heartbeat",
+                            "value": {
+                                "kind": "report",
+                                "message": "Server running",
+                                "percentage": 100
+                            }
+                        }
+                    }
+                    yield f"data: {json.dumps(heartbeat)}\n\n"
+                    await asyncio.sleep(30)
+            
+            return StreamingResponse(
+                mcp_event_stream(),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST",
+                    "Access-Control-Allow-Headers": "Content-Type, Cache-Control"
                 }
             )
         
